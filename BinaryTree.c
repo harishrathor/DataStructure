@@ -6,19 +6,38 @@ typedef struct BinaryTree{
 	struct BinaryTree *left;
 	struct BinaryTree *right;
 }BST;
-BST *createNode();
+typedef struct Queue{
+	struct BinaryTree *node;
+	struct Queue *next;
+}Q;
+
+Q *front;
+Q *rear;
+void Enqueue(BST *);
+BST *Dequeue();
+int IsEmpty();
+BST *Front();
+Q *createQNode();
+Q *createQ();
+
+BST *createNode(int);
 BST *insert(BST *,int);
 void InOrder(BST *);
 void PostOrder(BST *);
 void PreOrder(BST *);
 int totalElement=0;
 int find(BST *,int);
+void LevelOrder(BST *);
+
+
 void main(){
 	int i,element;
 	BST *root;
+	front=NULL;
+	rear=NULL;
 	root=NULL;
-	root=insert(root,50);
-	for(i=4;i<50;i++){
+//	root=insert(root,50);
+	for(i=2;i<10;i++){
 		root=insert(root,i);
 		root=insert(root,2*i);
 		root=insert(root,i/2);
@@ -36,7 +55,8 @@ void main(){
 		printf("\nElement %d is not present in the tree.\n",element);
 	else
 		printf("Element %d exists in the tree.",element);
-
+	printf("\nPrinting from LevelOrder:\n");
+	LevelOrder(root);
 }
 BST *createNode(int element){
 	BST *new_node;
@@ -79,6 +99,39 @@ void PostOrder(BST *root){
 	//	InOrder(root->right);
 	}
 }
+
+void LevelOrder(BST *root){
+	BST *temp;
+	int level=0,nodesInCurrentLeve=0,nodesInNextLevel=0;
+	if(root==NULL)
+		return;
+	Enqueue(root);
+	nodesInCurrentLeve++;
+	while(!IsEmpty()){
+		temp=Dequeue();
+		nodesInCurrentLeve--;
+		if(temp){
+			printf("   %d",temp->data);
+			if(temp->left!=NULL){
+				Enqueue(temp->left);
+				nodesInNextLevel++;
+			}
+			if(temp->right!=NULL){
+				Enqueue(temp->right);
+				nodesInNextLevel++;
+			}
+		}
+		if(nodesInCurrentLeve==0){
+			printf("\n");
+			nodesInCurrentLeve=nodesInNextLevel;
+			nodesInNextLevel=0;
+			level++;
+
+		}
+	}
+	printf("\nTotal NUMBER of LEvels are %d",level);
+}
+
 int find(BST *root,int element){
 	if(root==NULL)
 		return -1;
@@ -88,4 +141,42 @@ int find(BST *root,int element){
 		return find(root->left,element);
 	else
 		return find(root->right,element);
+}
+Q *createQNode(BST *element){
+	Q *new_node;
+	new_node=(Q *)malloc(sizeof(Q));
+	new_node->node=element;
+	new_node->next=NULL;
+	return new_node;
+}
+void Enqueue(BST *element){
+	Q *new_node,*temp;
+	new_node=createQNode(element);
+	if(front==NULL){
+		front=new_node;
+		rear=new_node;
+		return;
+	}
+	temp=rear;
+	temp->next=new_node;
+}
+BST * Dequeue(){
+	Q *temp;
+	if(front==NULL){
+		return NULL;
+	}
+	temp=front;
+	front=temp->next;
+	return temp->node;
+}
+int IsEmpty(){
+	return front==NULL;
+}
+Q *createQ(){
+	return front;
+}
+BST *Front(){
+	Q *temp;
+	temp=front;
+	return temp->node;
 }
